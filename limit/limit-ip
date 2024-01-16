@@ -1,0 +1,110 @@
+#!/bin/bash
+function vmip(){
+#LIMITVMESSIP
+echo -n > /tmp/ipvmess.txt
+sleep 440
+data=( `ls /etc/kyt/limit/vmess/ip`);
+    for user in "${data[@]}"
+    do
+        iplimit=$(cat /etc/kyt/limit/vmess/ip/$user)
+ehh=$(cat /var/log/xray/access.log | grep "$user" | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq | cut -d . -f 1-3 | sed s/127.0.0//g);
+        cekcek=$(echo -e "$ehh" | wc -l);
+        if [[ $cekcek -gt $iplimit ]]; then
+            exp=$(grep -w "^#vm# $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+                 sed -i "/^#vm# $user $exp/,/^},{/d" /etc/xray/config.json
+                 sed -i "/^#vm# $user $exp/d" /etc/vmess/.vmess.db
+                  systemctl restart xray >> /dev/null 2>&1
+                  jum2=$(cat /tmp/ipvmess.txt | wc -l)
+                  rm -rf /etc/kyt/limit/vmess/ip/$user
+                 # rm -rf /etc/kyt/limit/vmess/quota/$user
+                  send_log
+                else
+            echo ""
+        fi
+        sleep 0.1
+    done
+}
+function vlip(){
+#LIMITVLESSIP
+echo -n > /tmp/ipvless.txt
+sleep 440
+data=( `ls /etc/kyt/limit/vless/ip`);
+    for user in "${data[@]}"
+    do
+        iplimit=$(cat /etc/kyt/limit/vless/ip/$user)
+ehh=$(cat /var/log/xray/access.log | grep "$user" | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq | cut -d . -f 1-3 | sed s/127.0.0//g);
+        cekcek=$(echo -e "$ehh" | wc -l);
+        if [[ $cekcek -gt $iplimit ]]; then
+            exp=$(grep -w "^#& $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+                sed -i "/^#& $user $exp/,/^},{/d" /etc/xray/config.json
+                sed -i "/^#& $user $exp/d" /etc/vless/.vless.db
+                  systemctl restart xray >> /dev/null 2>&1
+                  jum2=$(cat /tmp/ipvless.txt | wc -l)
+                  rm -rf /etc/kyt/limit/vless/ip/$user
+                #  rm -rf /etc/kyt/limit/vless/quota/$user
+                  send_log
+                else
+            echo ""
+        fi
+        sleep 0.1
+    done
+}
+function trip(){
+#LIMITIPTROJAN
+echo -n > /tmp/iptrojan.txt
+sleep 440
+data=( `ls /etc/kyt/limit/trojan/ip`);
+    for user in "${data[@]}"
+    do
+        iplimit=$(cat /etc/kyt/limit/trojan/ip/$user)
+ehh=$(cat /var/log/xray/access.log | grep "$user" | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq | cut -d . -f 1-3 | sed s/127.0.0//g);
+        cekcek=$(echo -e "$ehh" | wc -l);
+        if [[ $cekcek -gt $iplimit ]]; then
+            exp=$(grep -w "^#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+                 sed -i "/^#! $user $exp/,/^},{/d" /etc/xray/config.json
+                 sed -i "/^#! $user $exp/d" /etc/trojan/.trojan.db
+                  systemctl restart xray >> /dev/null 2>&1
+                  jum2=$(cat /tmp/iptrojan.txt | wc -l)
+                  rm -rf /etc/kyt/limit/trojan/ip/$user
+                #  rm -rf /etc/kyt/limit/trojan/quota/$user
+                  send_log
+                else
+            echo ""
+        fi
+        sleep 0.1
+    done
+}
+function shdip(){
+#LIMITIPSHADOWSOCKS
+echo -n > /tmp/ipshadowsocks.txt
+sleep 440
+data=( `ls /etc/kyt/limit/shadowsocks/ip`);
+    for user in "${data[@]}"
+    do
+        iplimit=$(cat /etc/kyt/limit/shadowsocks/ip/$user)
+ehh=$(cat /var/log/xray/access.log | grep "$user" | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq | cut -d . -f 1-3 | sed s/127.0.0//g);
+        cekcek=$(echo -e "$ehh" | wc -l);
+        if [[ $cekcek -gt $iplimit ]]; then
+            exp=$(grep -w "^#ss# $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+                sed -i "/^#ss# $user $exp/,/^},{/d" /etc/xray/config.json
+                sed -i "/^#ss# $user $exp/d" /etc/shadowsocks/.shadowsocks.db
+                  systemctl restart xray >> /dev/null 2>&1
+                  jum2=$(cat /tmp/ipshadowsocks.txt | wc -l)
+                  rm -rf /etc/kyt/limit/shadowsocks/ip/$user
+               #   rm -rf /etc/kyt/limit/shadowsocks/quota/$user
+                  send_log
+                else
+            echo ""
+        fi
+        sleep 0.1
+    done
+}
+if [[ ${1} == "vmip" ]]; then
+vmip
+elif [[ ${1} == "vlip" ]]; then
+vlip
+elif [[ ${1} == "trip" ]]; then
+trip
+elif [[ ${1} == "shdip" ]]; then
+shdip
+fi

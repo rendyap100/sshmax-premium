@@ -1,0 +1,22 @@
+#!/bin/bash
+echo -n > /tmp/ipxray.txt
+data=( `cat /etc/xray/config.json | grep '#vm#' | cut -d ' ' -f 2 | sort | uniq`);
+sleep 4
+for user in "${data[@]}"
+do
+iplimit=$(cat /etc/kyt/limit/vmess/ip/$user)
+ehh=$( `cat /var/log/xray/access.log | tail -n 500 | cut -d " " -f 3 | sed 's/tcp://g' | cut -d ":" -f 1 | sort | uniq`);
+cekcek=$(echo -e "$ehh" | wc -l);
+if [[ $cekcek -gt $iplimit ]]; then
+disable-xray  $user $cekcek $iplimit "$ehh"
+nais=3
+else
+echo > /dev/null
+fi
+sleep 0.1
+done
+if [[ $nais -gt 1 ]]; then
+systemctl restart xray
+else
+echo > /dev/null
+fi
